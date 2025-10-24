@@ -6,7 +6,27 @@ server:
 spring:
   application:
     name: agencia-api
-  
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github: # Provider name (must be 'github' to use Spring's defaults)
+            client-id: Ov23liz106XkHOH07yfm  # Replace with GitHub OAuth App Client ID
+            client-secret: 6a624ea531de31fb47c547ebae649226c707a950  # Replace with GitHub OAuth App Client Secret
+            scope: user:email,read:user
+            redirect-uri: https://oauth.pstmn.io/v1/callback # Must match GitHub OAuth App
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login  # GitHub's unique user identifier
+      resourceserver:
+        opaque-token:
+          introspection-uri: https://api.github.com/user
+          client-id: Ov23liz106XkHOH07yfm
+          client-secret: 6a624ea531de31fb47c547ebae649226c707a950
   datasource:
     url: jdbc:h2:mem:agencia_db
     driver-class-name: org.h2.Driver
@@ -41,8 +61,10 @@ springdoc:
 logging:
   level:
     com.santander: INFO
-    org.springframework.web: INFO
+    org.springframework.web: DEBUG
     org.hibernate.SQL: WARN
+    org.springframework.security: TRACE  # Add this line
+    org.springframework.security.oauth2: TRACE
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
   charset:
