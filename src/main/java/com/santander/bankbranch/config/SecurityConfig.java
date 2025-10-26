@@ -1,5 +1,7 @@
 package com.santander.bankbranch.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
@@ -18,9 +20,12 @@ import java.util.Map;
 @Configuration
 public class SecurityConfig {
 
+    // Initialize SLF4J logger
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("--- OAuth2 SecurityFilterChain is being configured ---");
+        logger.info("--- OAuth2 SecurityFilterChain is being configured ---");
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/").permitAll()
@@ -48,6 +53,9 @@ public class SecurityConfig {
 
         @Override
         public OAuth2AuthenticatedPrincipal introspect(String token) {
+            // Log the token (for debugging only, avoid in production)
+            logger.info("Validating token: {}", token);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
             headers.set("Accept", "application/json");
@@ -61,14 +69,17 @@ public class SecurityConfig {
             );
 
             if (!response.getStatusCode().is2xxSuccessful()) {
+                logger.error("Token validation failed with status: {}", response.getStatusCode());
                 throw new IllegalArgumentException("Token validation failed: " + response.getStatusCode());
             }
 
             Map<String, Object> attributes = response.getBody();
             if (attributes == null || !attributes.containsKey("login")) {
+                logger.error("Invalid user info response: {}", attributes);
                 throw new IllegalArgumentException("Invalid user info response");
             }
 
+            logger.info("Token validated successfully for user: {}", attributes.get("login"));
             return new OAuth2AuthenticatedPrincipal() {
                 @Override
                 public Map<String, Object> getAttributes() {
