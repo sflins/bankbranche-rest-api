@@ -53,14 +53,19 @@ spring:
 
 springdoc:
   api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
+    path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui/index.html
+      enabled: true
+      oauth2-redirect-url: http://localhost:8080/swagger-ui/oauth2-redirect.html
+      use-pkce: true
+      csrf:
+        enabled: false
 
 logging:
   level:
-    com.santander: INFO
+    com.santander: DEBUG
+    org.springdoc: TRACE
     org.springframework.web: DEBUG
     org.hibernate.SQL: WARN
     org.springframework.security: TRACE  # Add this line

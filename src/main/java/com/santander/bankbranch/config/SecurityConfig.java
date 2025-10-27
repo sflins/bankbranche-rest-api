@@ -14,13 +14,11 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
 public class SecurityConfig {
 
-    // Initialize SLF4J logger
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Bean
@@ -28,6 +26,8 @@ public class SecurityConfig {
         logger.info("--- OAuth2 SecurityFilterChain is being configured ---");
         http
                 .authorizeHttpRequests(authorize -> authorize
+                        // Allow public access to Swagger UI and OpenAPI endpoints
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/desafio/**").authenticated()
                         .anyRequest().authenticated()
@@ -53,9 +53,7 @@ public class SecurityConfig {
 
         @Override
         public OAuth2AuthenticatedPrincipal introspect(String token) {
-            // Log the token (for debugging only, avoid in production)
             logger.info("Validating token: {}", token);
-
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
             headers.set("Accept", "application/json");

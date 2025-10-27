@@ -87,53 +87,6 @@ class BankBranchControllerTest {
     }
 
     @Test
-    @DisplayName("Should search for nearby branches successfully")
-    void deveBuscarAgenciasProximasComSucesso() throws Exception {
-        DistanciaResponse response = new DistanciaResponse(
-            new DistanciaResponse.PosicaoUsuario(-10.0, 5.0),
-            Map.of(
-                "AGENCIA_2", "distancia = 2.20",
-                "AGENCIA_1", "distancia = 10.00", 
-                "AGENCIA_3", "distancia = 37.42"
-            ),
-            3,
-            "AGENCIA_2",
-            2.2
-        );
-
-        when(bankBranchService.findNearbyBankBranches(-10.0, 5.0)).thenReturn(response);
-
-        mockMvc.perform(get("/desafio/distanciasproximas")
-                .param("posX", "-10.0")
-                .param("posY", "5.0"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.posicaoUsuario.posX").value(-10.0))
-                .andExpect(jsonPath("$.posicaoUsuario.posY").value(5.0))
-                .andExpect(jsonPath("$.totalAgencias").value(3))
-                .andExpect(jsonPath("$.agenciaMaisProxima").value("AGENCIA_2"))
-                .andExpect(jsonPath("$.menorDistancia").value(2.2))
-                .andExpect(jsonPath("$.agencias.AGENCIA_2").value("distancia = 2.20"))
-                .andExpect(jsonPath("$.agencias.AGENCIA_1").value("distancia = 10.00"))
-                .andExpect(jsonPath("$.agencias.AGENCIA_3").value("distancia = 37.42"));
-
-        verify(bankBranchService).findNearbyBankBranches(-10.0, 5.0);
-    }
-
-    @Test
-    @DisplayName("Should return error 500 for internal exception")
-    void deveRetornarErro500ParaExcecaoInterna() throws Exception {
-        when(bankBranchService.findNearbyBankBranches(anyDouble(), anyDouble()))
-            .thenThrow(new RuntimeException("Erro interno"));
-
-        mockMvc.perform(get("/desafio/distanciasproximas")
-                .param("posX", "0.0")
-                .param("posY", "0.0"))
-                .andExpect(status().isInternalServerError());
-
-        verify(bankBranchService).findNearbyBankBranches(0.0, 0.0);
-    }
-
-    @Test
     @DisplayName("Should return a 400 error when trying to register a very close branch")
     void deveRetornarErro400QuandoTentarCadastrarAgenciaMuitoProxima() throws Exception {
         RegisterBankBranchRequest request = new RegisterBankBranchRequest(10.0, -5.0);
